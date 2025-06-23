@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Каталог — Аптека</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="logo">Здоровье+</div>
+    <nav>
+      <ul class="nav">
+        <li><a href="index.html">Главная</a></li>
+        <li><a href="catalog.html">Каталог</a></li>
+        <li><a href="contact.html">Контакты</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="catalog">
+    <h1>Каталог товаров</h1>
+    <input type="text" placeholder="Поиск..." class="search-field">
+    <div class="sort-controls">
+      <label for="sort">Сортировка:</label>
+      <select id="sort" class="sort-select">
+        <option value="name">По названию (А–Я)</option>
+        <option value="price">По цене (по возрастанию)</option>
+      </select>
+    </div>
+
+
+    <div class="items" id="items-container">
+
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2025 Аптека "Здоровье+".</p>
+  </footer>
+<script>
+  const itemsData = [
+    { name: "Аспирин", price: 150, desc: "Обезболивающее и жаропонижающее", link: "item.html" },
+    { name: "Парацетамол", price: 100, desc: "Снижение температуры" },
+    { name: "Ибупрофен", price: 200, desc: "Противовоспалительное средство" },
+    { name: "Нурофен", price: 120, desc: "Противовоспалительное средство" },
+    { name: "Цитрамон", price: 60, desc: "Комбинированный препарат" },
+    { name: "Анальгин", price: 90, desc: "Обезболивающее средство" },
+    { name: "Супрадин", price: 350, desc: "Витамины и минералы" },
+    { name: "Но-шпа", price: 180, desc: "Спазмолитик" },
+    { name: "Лоратадин", price: 75, desc: "Противоаллергическое средство" },
+  ];
+
+  const itemsContainer = document.getElementById("items-container");
+  const searchField = document.querySelector(".search-field");
+  const sortSelect = document.getElementById("sort");
+  const pagination = document.getElementById("pagination");
+
+  const ITEMS_PER_PAGE = 4;
+  let currentPage = 1;
+  let filteredItems = [...itemsData];
+
+  function renderItems(items) {
+    itemsContainer.innerHTML = "";
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    const pageItems = items.slice(start, end);
+
+    pageItems.forEach((item, index) => {
+      const itemHTML = `
+        ${item.link ? `<a href="${item.link}" class="item-link">` : ""}
+        <div class="item" data-name="${item.name}" data-price="${item.price}">
+          <h3>${item.name}</h3>
+          <p>${item.desc}</p>
+          <span>${item.price}₽</span>
+        </div>
+        ${item.link ? `</a>` : ""}
+      `;
+      itemsContainer.insertAdjacentHTML("beforeend", itemHTML);
+    });
+  }
+
+  function renderPagination(totalItems) {
+    pagination.innerHTML = "";
+    const pageCount = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    for (let i = 1; i <= pageCount; i++) {
+      const btn = document.createElement("button");
+      btn.textContent = i;
+      btn.className = i === currentPage ? "active" : "";
+      btn.addEventListener("click", () => {
+        currentPage = i;
+        renderItems(filteredItems);
+        renderPagination(filteredItems.length);
+      });
+      pagination.appendChild(btn);
+    }
+  }
+
+  function applyFilters() {
+    const query = searchField.value.toLowerCase().trim();
+    filteredItems = itemsData.filter(item =>
+      item.name.toLowerCase().includes(query)
+    );
+
+    const sortValue = sortSelect.value;
+    if (sortValue === "name") {
+      filteredItems.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortValue === "price") {
+      filteredItems.sort((a, b) => a.price - b.price);
+    }
+
+    currentPage = 1;
+    renderItems(filteredItems);
+    renderPagination(filteredItems.length);
+  }
+
+  searchField.addEventListener("input", applyFilters);
+  sortSelect.addEventListener("change", applyFilters);
+
+  // Начальная отрисовка
+  applyFilters();
+</script>
+</body>
+</html>
